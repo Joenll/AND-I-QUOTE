@@ -9,19 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-        public function up(): void
-        {
-            Schema::create('customers', function (Blueprint $table) {
-                $table->id();
-                $table->string('name'); // required
-                $table->date('dob'); // required
-                $table->string('address')->nullable();
-                $table->string('email')->unique(); // required
-                $table->string('contact')->nullable(); // required in UI
-                $table->timestamps();
-            });
-        }
-
+    public function up(): void
+    {
+        Schema::create('customers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');                // required
+            $table->date('date_of_birth');         // required
+            $table->string('address')->nullable();
+            $table->string('email')->unique();     // required
+            $table->string('contact');             // required
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

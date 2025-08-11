@@ -1,8 +1,9 @@
 // tailwind.config.js
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    "./resources/**/*.blade.php",
+    "./resources/**/*.vue",
+    "./resources/**/*.js",
   ],
   theme: {
     extend: {},

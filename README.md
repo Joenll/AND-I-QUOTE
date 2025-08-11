@@ -5,13 +5,10 @@ https://github.com/Joenll/AND-I-QUOTE.git
 cd <repo-name>
 
 2.  Install Dependencies for both Backend and Frontend
-# Backend dependencies
+# Install Laravel (backend) dependencies
 composer install
-# For Laravel's Vite/Mix assets
-npm install  
 
-
-# Frontend dependencies
+# Install Node.js dependencies for frontend assets
 npm install
 
 
@@ -42,17 +39,23 @@ MAIL_FROM_NAME="And I Quote"
 php artisan migrate
 
 
-5.Run the Development Servers
-# Backend
+5.Run the Development Servers 
+# different terminal
+
+# for development
+php artisan serve
+npm run dev
+
+# for production
+npm run build
 php artisan serve
 
-# Frontend
-cd frontend
-npm run dev
+Now open http://127.0.0.1:8000 in your browser.
+
 
 6.API Endpoints
 -All API responses are JSON format.
-Base URL: http://localhost:8000/api
+Base URL: http://127.0.0.1:8000/api/v1
 
 # Customers
 
@@ -109,14 +112,14 @@ Content-Type: application/json
 
 
  8. Email Sending Notes
-# The email will be sent using the Brevo SMTP relay.
+# The email will be sent using the Brevo API.
 
 # Ensure your .env mail settings are correct before testing.
 POST /api/v1/quotations/{quotation}/send-email
 
 
 
-Brevo Email Setup
+Brevo API Setup
 # Step 1 — Create a Brevo Account
 1. Go to https://app.brevo.com and sign up for a free account.
 2. Verify your email address and complete the account setup.
@@ -129,18 +132,16 @@ Brevo only allows sending from verified addresses.
 3. Enter the From Name (e.g., AND I QUOTE) and From Email (e.g., yourname@example.com).
 4. Brevo will send you a confirmation email — click the link inside to verify.
 
-# Step 3 — Configure SMTP
-1. In Brevo dashboard, go to SMTP & API.
-2. Find the SMTP username (usually your Brevo login email) and generate an SMTP password.
-3. Keep these credentials safe — you’ll use them in .env.
+# Step 3 — Generate API Key
+In the Brevo dashboard, go to SMTP & API → API Keys.
 
-# example .env mail config
-MAIL_MAILER=smtp
-MAIL_HOST=smtp-relay.brevo.com
-MAIL_PORT=587
-MAIL_USERNAME=your-brevo-email@example.com
-MAIL_PASSWORD=your-brevo-smtp-password
-MAIL_ENCRYPTION=tls
+1. Click Generate a New API Key.
+2. Choose a name for your key (e.g., Quotation App) and save it.
+3. Copy the generated API key — you’ll use it in .env.
+
+# example .env mail config (Brevo API)
+BREVO_API_KEY=your-brevo-api-key
 MAIL_FROM_ADDRESS=verified-sender@example.com
 MAIL_FROM_NAME="AND I QUOTE"
+
 

@@ -9,20 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-        public function up(): void
-        {
-            Schema::create('quotation_items', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('quotation_id')->constrained('quotations')->onDelete('cascade');
-                $table->string('item_description');
-                $table->integer('quantity');
-                $table->decimal('unit_price', 10, 2);
-                $table->decimal('total_price', 12, 2); // stores quantity × unit_price
-                $table->timestamps();
-            });
-        }
-
-
+    public function up(): void
+    {
+        Schema::create('quotation_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('quotation_id')
+                  ->constrained('quotations')
+                  ->onDelete('cascade');
+            $table->string('item_description')->nullable();
+            $table->integer('quantity');
+            $table->decimal('unit_price', 10, 2);
+            $table->decimal('total_price', 12, 2); // quantity × unit_price
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

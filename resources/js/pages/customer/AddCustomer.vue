@@ -13,22 +13,42 @@ export default {
         date_of_birth: "",
       },
       saving: false,
-      errors: {},
+      //  Predefine all possible error fields so Vue's reactivity always picks them up
+      errors: {
+        name: [],
+        email: [],
+        contact: [],
+        address: [],
+        date_of_birth: [],
+      },
     };
   },
   methods: {
     async addCustomer() {
       this.saving = true;
-      this.errors = {};
+      // Clear existing errors
+      this.errors = {
+        name: [],
+        email: [],
+        contact: [],
+        address: [],
+        date_of_birth: [],
+      };
+
       try {
-        await axios.post("http://localhost:8000/api/v1/customers", this.customer);
+        await axios.post(`/api/v1/customers`, this.customer);
+
+        // ✅ Only runs if no validation errors
         alert("Customer added successfully!");
-        this.$router.push("/");
+        this.$router.push("/customers");
+
       } catch (err) {
         if (err.response && err.response.status === 422) {
-          this.errors = err.response.data.errors;
+          console.log("Validation errors:", err.response.data.errors); // 🔍 Debug check
+          // Assign Laravel's validation errors
+          this.errors = { ...this.errors, ...err.response.data.errors };
         } else {
-          alert("Failed to add customer.");
+          alert("Failed to add customer. Please try again.");
         }
       } finally {
         this.saving = false;
@@ -39,13 +59,13 @@ export default {
 </script>
 
 <template>
-  <div class="p-8 bg-gray-50 min-h-screen">
+  <div class="p-8 bg-white min-h-screen">
     <div class="max-w-4xl mx-auto">
       <!-- Back Button -->
-      <div class="mb-6">
+      <div class="mb-6 flex justify-start">
         <router-link
           to="/customers"
-          class="text-blue-600 hover:underline text-sm"
+          class="text-blue-600 hover:underline text-md"
         >
           ← Back to Customers
         </router-link>
@@ -53,7 +73,7 @@ export default {
 
       <!-- Form -->
       <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Add New Customer</h1>
+        <h1 class="text-2xl font-bold text-blue-800 mb-6">Add New Customer</h1>
 
         <form @submit.prevent="addCustomer" class="space-y-5">
           <!-- Name -->
@@ -64,9 +84,8 @@ export default {
               type="text"
               placeholder="Enter full name"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
-              required
             />
-            <p v-if="errors.name" class="text-red-500 text-sm mt-1">
+            <p v-if="errors.name.length" class="text-red-500 text-sm mt-1">
               {{ errors.name[0] }}
             </p>
           </div>
@@ -79,9 +98,8 @@ export default {
               type="email"
               placeholder="Enter email address"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
-              required
             />
-            <p v-if="errors.email" class="text-red-500 text-sm mt-1">
+            <p v-if="errors.email.length" class="text-red-500 text-sm mt-1">
               {{ errors.email[0] }}
             </p>
           </div>
@@ -95,7 +113,7 @@ export default {
               placeholder="Enter contact number"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
             />
-            <p v-if="errors.contact" class="text-red-500 text-sm mt-1">
+            <p v-if="errors.contact.length" class="text-red-500 text-sm mt-1">
               {{ errors.contact[0] }}
             </p>
           </div>
@@ -109,7 +127,7 @@ export default {
               rows="3"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
             ></textarea>
-            <p v-if="errors.address" class="text-red-500 text-sm mt-1">
+            <p v-if="errors.address.length" class="text-red-500 text-sm mt-1">
               {{ errors.address[0] }}
             </p>
           </div>
@@ -120,13 +138,13 @@ export default {
               Date of Birth
             </label>
             <input
-              v-model="customer.dob"
+              v-model="customer.date_of_birth"
               type="date"
               placeholder="Select date of birth"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
-              required
             />
-            <p v-if="errors.date_of_birth" class="text-red-500 text-sm mt-1">
+            <!-- ✅ Will now always show because date_of_birth key is always reactive -->
+            <p v-if="errors.date_of_birth.length" class="text-red-500 text-sm mt-1">
               {{ errors.date_of_birth[0] }}
             </p>
           </div>

@@ -9,7 +9,7 @@ class Customer extends Model
     // Allow mass assignment for these columns
     protected $fillable = [
         'name',
-        'dob',
+        'date_of_birth',
         'address',
         'email',
         'contact'

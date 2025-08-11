@@ -2,37 +2,41 @@
 import axios from "axios";
 
 export default {
-  name: "AddQuotation",
+  name: "EditQuotation",
   data() {
     return {
       customer: null,
-      quotation_date: new Date().toISOString().substr(0, 10),
-      items: [
-        { product_name: "", item_description: "", quantity: 1, unit_price: 0 }
-      ],
+      quotation_date: "",
+      items: [],
       loading: false,
-      error: null
+      error: null,
+      errors: {} // ✅ for field-specific errors
     };
   },
   computed: {
-    customerId() {
-      return this.$route.query.customer_id;
+    quotationId() {
+      return this.$route.params.id;
     },
     grandTotal() {
-      return this.items.reduce((sum, item) => {
-        return sum + (item.quantity * item.unit_price);
-      }, 0);
+      return this.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
     }
   },
   async created() {
-    if (this.customerId) {
-      try {
-        const res = await axios.get(`http://localhost:8000/api/v1/customers/${this.customerId}`);
-        this.customer = res.data.customer || res.data; // depends on API shape
-      } catch (err) {
-        console.error(err);
-        this.error = "Failed to load customer details.";
+    try {
+      const res = await axios.get(`/api/v1/quotations/${this.quotationId}`);
+      const quotation = res.data.quotation || res.data;
+
+      this.customer = quotation.customer || {};
+
+      // ✅ Format date to YYYY-MM-DD
+      if (quotation.quotation_date) {
+        const dateObj = new Date(quotation.quotation_date);
+        this.quotation_date = dateObj.toISOString().split("T")[0];
       }
+      this.items = quotation.items || [];
+    } catch (err) {
+      console.error(err);
+      this.error = "Failed to load quotation details.";
     }
   },
   methods: {
@@ -42,26 +46,25 @@ export default {
     removeItemRow(index) {
       this.items.splice(index, 1);
     },
-    async saveQuotation() {
-      if (!this.customerId) {
-        alert("No customer ID found.");
-        return;
-      }
-
+    async updateQuotation() {
       this.loading = true;
       this.error = null;
+      this.errors = {}; // clear old field errors
       try {
         const payload = {
-          customer_id: this.customerId,
           quotation_date: this.quotation_date,
           items: this.items
         };
-        await axios.post("http://localhost:8000/api/v1/quotations", payload);
-        alert("Quotation added successfully!");
-        this.$router.push(`/customer/${this.customerId}`);
+        await axios.put(`/api/v1/quotations/${this.quotationId}`, payload);
+        alert("Quotation updated successfully!");
+        this.$router.push(`/customer/${this.customer.id}`);
       } catch (err) {
-        console.error(err);
-        this.error = "Failed to add quotation.";
+        if (err.response && err.response.data) {
+          this.error = err.response.data.message || "Failed to update quotation.";
+          this.errors = err.response.data.errors || {};
+        } else {
+          this.error = "Failed to update quotation.";
+        }
       } finally {
         this.loading = false;
       }
@@ -71,39 +74,41 @@ export default {
 </script>
 
 <template>
-
-
-
   <div class="p-8 max-w-4xl mx-auto text-black">
-        
-<!-- Back Button -->
-<div class="mb-6 flex justify-start" v-if="customer && customer.id">
-  <router-link
-    :to="`/customer/${customer.id}`"
-    class="text-blue-600 hover:underline text-sm"
-  >
-    ← Back to Customer Details
-  </router-link>
-</div>
 
-    <h1 class="text-2xl font-bold mb-4">
-      Add Quotation for
-      <span v-if="customer">{{ customer.name }}</span>
-      <span v-else>Customer #{{ customerId }}</span>
-    </h1>
+    <!-- Back Button -->
+    <div class="mb-6 flex justify-start" v-if="customer && customer.id">
+      <router-link
+        :to="`/customer/${customer.id}`"
+        class="text-blue-600 hover:underline text-sm"
+      >
+        ← Back to Customer Details
+      </router-link>
+    </div>
+<h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">
+  <span class="text-blue-600">Edit Quotation</span> for
+  <span v-if="customer" class="text-gray-700 font-semibold">{{ customer.name }}</span>
+  <span v-else class="text-gray-400 italic">Customer</span>
+</h1>
 
 
+    <!-- General error -->
     <div v-if="error" class="text-red-500 mb-4">{{ error }}</div>
 
+    <!-- Quotation Date -->
     <div class="mb-4">
-      <label class="block text-sm font-medium mb-1">Quotation Date</label>
+      <label class="block text-sm font-medium mb-1 text-left">Quotation Date</label>
       <input
         v-model="quotation_date"
         type="date"
         class="border p-2 rounded w-full text-black"
       />
+      <p v-if="errors.quotation_date" class="text-red-500 text-sm mt-1">
+        {{ errors.quotation_date[0] }}
+      </p>
     </div>
 
+    <!-- Items Table -->
     <table class="w-full border mb-4 text-black">
       <thead class="bg-gray-100">
         <tr>
@@ -147,11 +152,11 @@ export default {
     <div class="font-bold mb-4">Grand Total: ₱{{ grandTotal.toFixed(2) }}</div>
 
     <button
-      @click="saveQuotation"
+      @click="updateQuotation"
       :disabled="loading"
       class="bg-green-500 text-white px-4 py-2 rounded"
     >
-      {{ loading ? "Saving..." : "Save Quotation" }}
+      {{ loading ? "Updating..." : "Update Quotation" }}
     </button>
   </div>
 </template>

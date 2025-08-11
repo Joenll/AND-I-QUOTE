@@ -10,11 +10,12 @@ export default {
         email: "",
         contact: "",
         address: "",
-        dob: "",
+        date_of_birth: "",
       },
       loading: true,
       error: null,
       saving: false,
+      errors: {}, // for backend validation errors
     };
   },
   async created() {
@@ -24,7 +25,7 @@ export default {
     async fetchCustomer() {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/v1/customers/${this.$route.params.id}`
+          `/api/v1/customers/${this.$route.params.id}`
         );
         this.customer = res.data.customer;
       } catch (err) {
@@ -37,16 +38,21 @@ export default {
     async updateCustomer() {
       this.saving = true;
       this.error = null;
+      this.errors = {};
       try {
         await axios.put(
-          `http://localhost:8000/api/v1/customers/${this.$route.params.id}`,
+          `/api/v1/customers/${this.$route.params.id}`,
           this.customer
         );
         alert("Customer updated successfully!");
-        this.$router.push(`/customer/${this.$route.params.id}`);
+        this.$router.push(`/customers`);
       } catch (err) {
         console.error(err);
-        this.error = "Failed to update customer.";
+        if (err.response && err.response.data && err.response.data.errors) {
+          this.errors = err.response.data.errors;
+        } else {
+          this.error = "Failed to update customer.";
+        }
       } finally {
         this.saving = false;
       }
@@ -56,15 +62,15 @@ export default {
 </script>
 
 <template>
-  <div class="p-8 bg-gray-50 min-h-screen">
+  <div class="p-8 bg-whitemin-h-screen">
     <div class="max-w-4xl mx-auto">
       <!-- Back Button -->
-      <div class="mb-6">
+      <div class="mb-6 flex justify-start">
         <router-link
-          :to="`/customer/${$route.params.id}`"
-          class="text-blue-600 hover:underline text-sm"
+          :to="`/customers`"
+          class="text-blue-600 hover:underline text-md"
         >
-          ← Back to Customer Details
+          ← Back to Customers
         </router-link>
       </div>
 
@@ -79,7 +85,7 @@ export default {
         v-if="!loading"
         class="bg-white p-6 rounded-xl shadow-md border border-gray-200"
       >
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Customer</h1>
+        <h1 class="text-2xl font-bold text-blue-800 mb-6">Edit Customer</h1>
 
         <form @submit.prevent="updateCustomer" class="space-y-5">
           <!-- Name -->
@@ -92,6 +98,9 @@ export default {
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
               required
             />
+            <p v-if="errors.name" class="text-red-500 text-sm mt-1">
+              {{ errors.name[0] }}
+            </p>
           </div>
 
           <!-- Email -->
@@ -104,6 +113,9 @@ export default {
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
               required
             />
+            <p v-if="errors.email" class="text-red-500 text-sm mt-1">
+              {{ errors.email[0] }}
+            </p>
           </div>
 
           <!-- Contact -->
@@ -115,6 +127,9 @@ export default {
               placeholder="Enter contact number"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
             />
+            <p v-if="errors.contact" class="text-red-500 text-sm mt-1">
+              {{ errors.contact[0] }}
+            </p>
           </div>
 
           <!-- Address -->
@@ -126,6 +141,9 @@ export default {
               placeholder="Enter full address"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
             ></textarea>
+            <p v-if="errors.address" class="text-red-500 text-sm mt-1">
+              {{ errors.address[0] }}
+            </p>
           </div>
 
           <!-- Date of Birth -->
@@ -134,11 +152,14 @@ export default {
               Date of Birth
             </label>
             <input
-              v-model="customer.dob"
+              v-model="customer.date_of_birth"
               type="date"
               placeholder="Select date of birth"
               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-blue-200 focus:outline-none text-black placeholder-gray-400"
             />
+            <p v-if="errors.date_of_birth" class="text-red-500 text-sm mt-1">
+              {{ errors.date_of_birth[0] }}
+            </p>
           </div>
 
           <!-- Submit Button -->

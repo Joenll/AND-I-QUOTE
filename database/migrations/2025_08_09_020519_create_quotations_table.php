@@ -9,17 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-        public function up(): void
-        {
-            Schema::create('quotations', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-                $table->date('quotation_date');
-                $table->decimal('grand_total', 10, 2)->default(0);
-                $table->timestamps();
-            });
-        }
-
+    public function up(): void
+    {
+        Schema::create('quotations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('customer_id')
+                  ->constrained()
+                  ->onDelete('cascade');
+            $table->date('quotation_date');
+            $table->decimal('grand_total', 10, 2)->default(0);
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

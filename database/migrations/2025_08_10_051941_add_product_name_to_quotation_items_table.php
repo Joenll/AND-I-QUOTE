@@ -10,17 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::table('quotation_items', function (Blueprint $table) {
-        $table->string('product_name')->after('quotation_id');
-    });
-}
+    {
+        Schema::table('quotation_items', function (Blueprint $table) {
+            $table->string('product_name')->after('quotation_id');
+        });
+    }
 
-public function down(): void
-{
-    Schema::table('quotation_items', function (Blueprint $table) {
-        $table->dropColumn('product_name');
-    });
-}
-
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('quotation_items', function (Blueprint $table) {
+            $table->dropColumn('product_name');
+        });
+    }
 };
