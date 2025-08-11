@@ -12,6 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('quotation_items', function (Blueprint $table) {
+            // Nice utilization of table relationship
+            // but be careful on using cascading delete technique
+            
             $table->id();
             $table->foreignId('quotation_id')
                   ->constrained('quotations')

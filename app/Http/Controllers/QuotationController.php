@@ -19,6 +19,8 @@ class QuotationController extends Controller
      */
     public function index(Request $request)
     {
+        // Returning paginated response is a very good approach
+        // This helps in loading time and prevent server stress
         $perPage = $request->query('per_page', 25);
 
         $quotations = Quotation::with(['customer', 'items'])
@@ -59,6 +61,13 @@ class QuotationController extends Controller
             $grandTotal = 0;
 
             foreach ($request->items as $it) {
+                // Using `round` php function in monetary values is not
+                // a good approach if taking only 2 decimal places
+                // In monetary values, it should be atleast 4 decimal places
+                // Or using number_format() is a better way to go without rounding the numerical values
+
+                // This block can be added into a private method to apply DRY principle
+                // since this is also repeated in the update() method
                 $total = round($it['quantity'] * $it['unit_price'], 2);
 
                 $quotation->items()->create([
@@ -70,6 +79,7 @@ class QuotationController extends Controller
                 ]);
 
                 $grandTotal += $total;
+                // Up to this block
             }
 
             $quotation->update(['grand_total' => round($grandTotal, 2)]);
@@ -92,6 +102,7 @@ class QuotationController extends Controller
      */
     public function update(UpdateQuotationRequest $request, Quotation $quotation)
     {
+        // Using transactional approach is nice, good job
         DB::beginTransaction();
 
         try {
@@ -106,6 +117,10 @@ class QuotationController extends Controller
                 $grandTotal = 0;
 
                 foreach ($request->items as $it) {
+                    // Using `round` php function in monetary values is not
+                    // a good approach if taking only 2 decimal places
+                    // In monetary values, it should be atleast 4 decimal places
+                    // Or using number_format() is a better way to go without rounding the numerical values
                     $total = round($it['quantity'] * $it['unit_price'], 2);
 
                     $quotation->items()->create([
@@ -156,12 +171,21 @@ class QuotationController extends Controller
             return response()->json(['error' => 'Customer or email not found.'], 422);
         }
 
+        /**
+         * Interactions with APIs should be done in a separate class library eg. creating App\Libraries\Brevo
+         * 
+         * Directly adding .env variables to controllers are okay but highly discouraged
+         * it must be added to a configuration file eg. config/brevo.php
+         * This fails when the application cache is not updated
+         */
+
         try {
             $config = Configuration::getDefaultConfiguration()
                 ->setApiKey('api-key', env('BREVO_API_KEY'));
 
             $apiInstance = new TransactionalEmailsApi(null, $config);
 
+            // Adding a content to a separate view is very good.
             $htmlContent = view('emails.quotation', [
                 'quotation' => $quotation,
                 'customer'  => $quotation->customer,
@@ -185,6 +209,10 @@ class QuotationController extends Controller
 
             return response()->json(['message' => 'Email sent to customer via Brevo API.']);
         } catch (\Throwable $e) {
+
+            // Suggestion:
+            // These fallback errors must be added to logs and errors must be specific coming from the actual API response
+            // Adding these to logs helps in better and faster resolution
             return response()->json([
                 'error'   => 'Failed to send email via Brevo API',
                 'message' => $e->getMessage(),

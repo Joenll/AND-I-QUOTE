@@ -26,6 +26,7 @@ class StoreQuotationRequest extends FormRequest
 
     public function messages()
     {
+        // Nice
         return [
             'customer_id.required' => 'Please select a customer.',
             'customer_id.exists' => 'The selected customer does not exist.',

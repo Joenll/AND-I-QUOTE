@@ -25,6 +25,7 @@ class UpdateQuotationRequest extends FormRequest
 
     public function messages()
     {
+        // Nice
         return [
             'quotation_date.before_or_equal' => 'Quotation date cannot be in the future.',
             'items.min' => 'You must have at least one item.',

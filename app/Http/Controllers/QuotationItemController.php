@@ -12,6 +12,7 @@ class QuotationItemController extends Controller
      */
     public function index()
     {
+        // Returning paginated response is a better approach
         return response()->json(QuotationItem::all());
     }
 
@@ -30,6 +31,10 @@ class QuotationItemController extends Controller
     public function update(Request $request, QuotationItem $quotationItem)
     {
         // Validate input data
+
+        // This part might be visually good but is not standard
+        // there should only one space after the property, the array assignment operator, and the value
+        // eg. 'product_name' => 'sometimes|string|max:255', not 'product_name'     => 'sometimes|string|max:255',
         $data = $request->validate([
             'product_name'     => 'sometimes|string|max:255',
             'item_description' => 'sometimes|string',

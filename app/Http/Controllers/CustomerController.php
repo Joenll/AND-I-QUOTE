@@ -17,6 +17,7 @@ class CustomerController extends Controller
     {
         $perPage = $request->query('per_page', 25);
 
+        // Very good on utilization of eloquent relations
         $customers = Customer::with('quotations.items')
             ->paginate($perPage);
 
@@ -31,6 +32,7 @@ class CustomerController extends Controller
     {
         $term = $request->query('term');
 
+        // Very good on utilization of eloquent relations
         $customers = Customer::with('quotations')
             ->where(function ($query) use ($term) {
                 $query->where('name', 'like', "%{$term}%")
@@ -69,6 +71,8 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
+        // Utilizing custom validation is good
+        // You implemented the DRY principles, nice job
         $customer = Customer::create($request->validated());
 
         return response()->json($customer, 201);
@@ -80,6 +84,8 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
+        // Utilizing custom validation is good
+        // You implemented the DRY principles, nice job
         $customer->update($request->validated());
 
         return response()->json($customer);

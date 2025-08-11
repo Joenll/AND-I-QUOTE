@@ -30,6 +30,7 @@ class UpdateCustomerRequest extends FormRequest
 
     public function messages()
     {
+        // Nice
         return [
             'name.required' => 'Customer name is required.',
             'date_of_birth.before' => 'Date of birth must be in the past.',

@@ -12,6 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
+            // The `dob` column was updated to `date_of_birth` 
+            // The migration was needed to be rolled back
+            // which is not proper especially when you already have
+            // plenty of tables
+            // You must add a new migration file when updating column names or any table properties
+            // eg. `php artisan make:migration update_dob_column_name_to_date_of_birth_from_customers_table --table=customers`
+            // so you don't need to rollback the migration which is risky when not properly handled
+
+
             $table->id();
             $table->string('name');                // required
             $table->date('date_of_birth');         // required
